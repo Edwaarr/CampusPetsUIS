@@ -15,13 +15,12 @@ public class Perro extends Mascota {
     
     // Comportamiento especial del perro
     @Override
-    public void jugar() {
-        if (energia > 10) {
-            felicidad = Math.min(100, felicidad + 30);
-            energia = Math.max(0, energia - 15);
-            System.out.println(nombre + " juega a buscar la pelota. Felicidad: " + felicidad + "%");
-        } else {
-            System.out.println(nombre + " está agotado.");
+    public void jugar() throws MascotaException {
+        if (energia <= 10) {
+            throw new MascotaException(nombre + " está agotado. ¡Necesita descansar!");
         }
+    felicidad = Math.min(100, felicidad + 30);
+    energia = Math.max(0, energia - 15);
+    System.out.println(nombre + " juega a buscar la pelota. Felicidad: " + felicidad + "%");
     }
 }

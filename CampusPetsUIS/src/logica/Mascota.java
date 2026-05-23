@@ -1,6 +1,6 @@
 package logica;
 
-public abstract class Mascota {
+public abstract class Mascota implements Cuidable {
     
     // Atributos
     protected String nombre;
@@ -18,41 +18,43 @@ public abstract class Mascota {
         this.felicidad = 100;
     }
     
-    // Métodos principales
-    public void comer() {
-        if (hambre < 100) {
-            hambre = Math.min(100, hambre + 20);
-            System.out.println(nombre + " ha comido. Hambre: " + hambre + "%");
-        } else {
-            System.out.println(nombre + " no tiene hambre.");
+    // Métodos principale
+    @Override
+    public void comer() throws MascotaException {
+        if (hambre >= 100) {
+            throw new MascotaException(nombre + " no tiene hambre. ¡Ya está satisfecho!");
         }
+    hambre = Math.min(100, hambre + 20);
+    System.out.println(nombre + " ha comido. Hambre: " + hambre + "%");
     }
     
-    public void jugar() {
-        if (energia > 10) {
-            felicidad = Math.min(100, felicidad + 20);
-            energia = Math.max(0, energia - 10);
-            System.out.println(nombre + " ha jugado. Felicidad: " + felicidad + "%");
-        } else {
-            System.out.println(nombre + " está muy cansado para jugar.");
+    @Override
+    public void jugar() throws MascotaException {
+        if (energia <= 10) {
+            throw new MascotaException(nombre + " está muy cansado para jugar. ¡Déjalo dormir!");
         }
+    felicidad = Math.min(100, felicidad + 20);
+    energia = Math.max(0, energia - 10);
+    System.out.println(nombre + " ha jugado. Felicidad: " + felicidad + "%");
     }
     
-    public void dormir() {
-        if (energia < 100) {
-            energia = Math.min(100, energia + 30);
-            System.out.println(nombre + " ha dormido. Energía: " + energia + "%");
-        } else {
-            System.out.println(nombre + " no tiene sueño.");
+    @Override
+    public void dormir() throws MascotaException {
+        if (energia >= 100) {
+            throw new MascotaException(nombre + " no tiene sueño. ¡Ya descansó suficiente!");
         }
+    energia = Math.min(100, energia + 30);
+    System.out.println(nombre + " ha dormido. Energía: " + energia + "%");
     }
     
+    @Override
     public void degradarAtributos() {
         hambre = Math.max(0, hambre - 5);
         energia = Math.max(0, energia - 3);
         felicidad = Math.max(0, felicidad - 4);
     }
     
+    @Override
     public String verEstado() {
         return "🐾 " + nombre + " (" + especie + ")" +
                "\n  Hambre: " + hambre + "%" +
@@ -61,6 +63,7 @@ public abstract class Mascota {
     }
     
     // Método abstracto que cada subclase implementa
+    @Override
     public abstract void hacerSonido();
     
     // Getters
@@ -75,5 +78,4 @@ public abstract class Mascota {
     public void setEnergia(int energia) { this.energia = energia; }
     public void setFelicidad(int felicidad) { this.felicidad = felicidad; }
     public void setNombre(String nombre) { this.nombre = nombre; }
-    
 }

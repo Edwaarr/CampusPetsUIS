@@ -15,13 +15,12 @@ public class Gato extends Mascota {
     
     // Comportamiento especial del gato
     @Override
-    public void jugar() {
-        if (energia > 10) {
-            felicidad = Math.min(100, felicidad + 25);
-            energia = Math.max(0, energia - 8);
-            System.out.println(nombre + " juega con un ovillo. Felicidad: " + felicidad + "%");
-        } else {
-            System.out.println(nombre + " prefiere dormir que jugar.");
+    public void jugar() throws MascotaException {
+        if (energia <= 10) {
+            throw new MascotaException(nombre + " prefiere dormir que jugar. ¡Está agotado!");
         }
+    felicidad = Math.min(100, felicidad + 25);
+    energia = Math.max(0, energia - 8);
+    System.out.println(nombre + " juega con un ovillo. Felicidad: " + felicidad + "%");
     }
 }

@@ -172,16 +172,7 @@ public class Juego {
             }
         }
     }
-    public void cambiarNombreMascota(String nuevoNombre) {
-    if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
-        System.out.println("El nombre no puede estar vacío.");
-        return;
-    }
-    usuario.getMascota().setNombre(nuevoNombre);
-    GestorArchivos.actualizarNombreMascota(nuevoNombre);
-    GestorArchivos.guardarDatos(usuario);
-    System.out.println("Nombre actualizado correctamente a: " + nuevoNombre);
-}
+    
 
     public void reiniciarJuego() {
         pantalla.dispose();
@@ -190,15 +181,27 @@ public class Juego {
 
     // Acciones de los botones
     public void accionComer() {
-        usuario.getMascota().comer();
+        try {
+            usuario.getMascota().comer();
+        } catch (MascotaException e) {
+            pantalla.mostrarMensaje("⚠️ " + e.getMessage());
+        }
     }
 
     public void accionJugar() {
-        usuario.getMascota().jugar();
+        try {
+            usuario.getMascota().jugar();
+        } catch (MascotaException e) {
+            pantalla.mostrarMensaje("⚠️ " + e.getMessage());
+        }
     }
 
     public void accionDormir() {
-        usuario.getMascota().dormir();
+        try {
+            usuario.getMascota().dormir();
+        } catch (MascotaException e) {
+            pantalla.mostrarMensaje("⚠️ " + e.getMessage());
+        }
     }
 
     public void accionSonido() {
