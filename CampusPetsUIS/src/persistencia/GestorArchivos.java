@@ -113,4 +113,47 @@ public class GestorArchivos {
     public static boolean existenDatos() {
         return new File(ARCHIVO).exists();
     }
+    // ===== ACTUALIZAR =====
+public static boolean actualizarNombreMascota(String nuevoNombre) {
+    if (!existenDatos()) {
+        System.out.println("No hay datos guardados para actualizar.");
+        return false;
+    }
+
+    try {
+        // Leer datos actuales
+        FileReader fr = new FileReader(ARCHIVO);
+        BufferedReader br = new BufferedReader(fr);
+        String linea = br.readLine();
+        br.close();
+        fr.close();
+
+        if (linea == null || linea.trim().isEmpty()) {
+            return false;
+        }
+
+        // Separar datos
+        String[] datos = linea.split(";");
+
+        // Actualizar solo el nombre de la mascota (posición 3)
+        datos[3] = nuevoNombre;
+
+        // Reconstruir línea
+        String lineaActualizada = String.join(";", datos);
+
+        // Sobreescribir archivo
+        FileWriter fw = new FileWriter(ARCHIVO);
+        BufferedWriter bw = new BufferedWriter(fw);
+        bw.write(lineaActualizada);
+        bw.close();
+        fw.close();
+
+        System.out.println("Nombre de mascota actualizado a: " + nuevoNombre);
+        return true;
+
+        } catch (IOException e) {
+        System.out.println("Error al actualizar datos: " + e.getMessage());
+        return false;
+        }
+    }
 }

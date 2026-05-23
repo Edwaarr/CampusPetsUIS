@@ -74,4 +74,6 @@ public abstract class Mascota {
     public void setHambre(int hambre) { this.hambre = hambre; }
     public void setEnergia(int energia) { this.energia = energia; }
     public void setFelicidad(int felicidad) { this.felicidad = felicidad; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
+    
 }

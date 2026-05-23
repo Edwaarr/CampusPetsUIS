@@ -172,6 +172,16 @@ public class Juego {
             }
         }
     }
+    public void cambiarNombreMascota(String nuevoNombre) {
+    if (nuevoNombre == null || nuevoNombre.trim().isEmpty()) {
+        System.out.println("El nombre no puede estar vacío.");
+        return;
+    }
+    usuario.getMascota().setNombre(nuevoNombre);
+    GestorArchivos.actualizarNombreMascota(nuevoNombre);
+    GestorArchivos.guardarDatos(usuario);
+    System.out.println("Nombre actualizado correctamente a: " + nuevoNombre);
+}
 
     public void reiniciarJuego() {
         pantalla.dispose();
