@@ -6,14 +6,17 @@ import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
 import persistencia.GestorArchivos;
+import java.util.ArrayList;
 
 public class Juego {
 
+    //Atributos
     private Usuario usuario;
     private PantallaJuego pantalla;
     private Timer timerDegradacion;
     private Timer timerMensajes;
     private boolean juegoActivo;
+    private ArrayList<String> historialAcciones;
 
     private static final String[] MENSAJES_UIS = {
         "¿Sabías que en la UIS hay varios animales sin hogar que necesitan ayuda?",
@@ -25,6 +28,7 @@ public class Juego {
     private int indiceMensaje = 0;
 
     public Juego() {
+        historialAcciones = new ArrayList<>();
         iniciarRegistro();
     }
 
@@ -183,29 +187,52 @@ public class Juego {
     public void accionComer() {
         try {
             usuario.getMascota().comer();
+            historialAcciones.add("🍖 " + usuario.getMascota().getNombre() + " comió - Hambre: " + usuario.getMascota().getHambre() + "%");
         } catch (MascotaException e) {
             pantalla.mostrarMensaje("⚠️ " + e.getMessage());
+            historialAcciones.add("⚠️ Intento de comer fallido: " + e.getMessage());
         }
     }
 
     public void accionJugar() {
         try {
             usuario.getMascota().jugar();
+            historialAcciones.add("🎾 " + usuario.getMascota().getNombre() + " jugó - Felicidad: " + usuario.getMascota().getFelicidad() + "%");
         } catch (MascotaException e) {
             pantalla.mostrarMensaje("⚠️ " + e.getMessage());
+            historialAcciones.add("⚠️ Intento de jugar fallido: " + e.getMessage());
         }
     }
 
     public void accionDormir() {
         try {
             usuario.getMascota().dormir();
+            historialAcciones.add("💤 " + usuario.getMascota().getNombre() + " durmió - Energía: " + usuario.getMascota().getEnergia() + "%");
         } catch (MascotaException e) {
             pantalla.mostrarMensaje("⚠️ " + e.getMessage());
+            historialAcciones.add("⚠️ Intento de dormir fallido: " + e.getMessage());
         }
     }
 
     public void accionSonido() {
         usuario.getMascota().hacerSonido();
+        historialAcciones.add("🔊 " + usuario.getMascota().getNombre() + " hizo un sonido");
+    }
+    
+    public void mostrarHistorial() {
+        if (historialAcciones.isEmpty()) {
+            System.out.println("No hay acciones registradas aún.");
+            return;
+        }
+        System.out.println("=== HISTORIAL DE ACCIONES ===");
+        for (String accion : historialAcciones) {
+            System.out.println(accion);
+        }
+        System.out.println("Total de acciones: " + historialAcciones.size());
+    }
+
+    public ArrayList<String> getHistorialAcciones() {
+        return historialAcciones;
     }
 
     // Getter
