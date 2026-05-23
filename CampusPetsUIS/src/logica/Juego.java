@@ -5,6 +5,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.Timer;
 import java.util.TimerTask;
+import persistencia.GestorArchivos;
 
 public class Juego {
 
@@ -28,71 +29,94 @@ public class Juego {
     }
 
     private void iniciarRegistro() {
-        // Pedir nombre del usuario
-        String nombre = JOptionPane.showInputDialog(null,
-                "¡Bienvenido a Campus Pets UIS! 🐾\nIngresa tu nombre:",
-                "Registro", JOptionPane.QUESTION_MESSAGE);
+    // Verificar si hay datos guardados
+    if (GestorArchivos.existenDatos()) {
+        int opcion = JOptionPane.showConfirmDialog(null,
+                "Se encontró una partida guardada. ¿Deseas continuarla?",
+                "Partida guardada", JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
 
-        if (nombre == null || nombre.trim().isEmpty()) {
-            nombre = "Estudiante";
-        }
-
-        // Pedir programa académico
-        String[] programas = {"Ingeniería de Sistemas", "Ingeniería Civil",
-            "Ingeniería Mecánica", "Medicina", "Derecho", "Otro"};
-        String programa = (String) JOptionPane.showInputDialog(null,
-                "Selecciona tu programa académico:",
-                "Registro", JOptionPane.QUESTION_MESSAGE,
-                null, programas, programas[0]);
-
-        if (programa == null) {
-            programa = "Otro";
-        }
-
-        usuario = new Usuario(nombre, programa);
-        usuario.registrarPerfil();
-
-        // Elegir tipo de mascota
-        String[] tipos = {"Gato", "Perro"};
-        String tipoElegido = (String) JOptionPane.showInputDialog(null,
-                "¡Hola " + nombre + "! ¿Qué mascota quieres adoptar?",
-                "Selección de mascota", JOptionPane.QUESTION_MESSAGE,
-                null, tipos, tipos[0]);
-
-        if (tipoElegido == null) {
-            tipoElegido = "Gato";
-        }
-
-        // Pedir nombre de la mascota
-        String nombreMascota = JOptionPane.showInputDialog(null,
-                "¿Cómo se llamará tu " + tipoElegido + "?",
-                "Nombre de mascota", JOptionPane.QUESTION_MESSAGE);
-
-        if (nombreMascota == null || nombreMascota.trim().isEmpty()) {
-            nombreMascota = tipoElegido.equals("Gato") ? "Michi" : "Firulais";
-        }
-
-        // Crear mascota según elección
-        Mascota mascota;
-        if (tipoElegido.equals("Gato")) {
-            mascota = new Gato(nombreMascota);
+        if (opcion == JOptionPane.YES_OPTION) {
+            usuario = GestorArchivos.cargarDatos();
+            abrirPantalla();
+            return;
         } else {
-            mascota = new Perro(nombreMascota);
+            GestorArchivos.eliminarDatos();
         }
-
-        usuario.asignarMascota(mascota);
-
-        // Crear pantalla
-        pantalla = new PantallaJuego(this);
-        pantalla.configurarInfoUsuario(usuario.getNombre(), usuario.getProgramaAcademico());
-        pantalla.configurarInfoMascota(mascota.getNombre(), mascota.getEspecie());
-        pantalla.actualizarBarras();
-        pantalla.setVisible(true);
-
-        juegoActivo = true;
-        iniciarTimers();
     }
 
+    // Registro nuevo
+    String nombre = JOptionPane.showInputDialog(null,
+            "¡Bienvenido a Campus Pets UIS! 🐾\nIngresa tu nombre:",
+            "Registro", JOptionPane.QUESTION_MESSAGE);
+
+    if (nombre == null || nombre.trim().isEmpty()) {
+        nombre = "Estudiante";
+    }
+
+    String[] programas = {"Ingeniería de Sistemas", "Ingeniería Civil",
+        "Ingeniería Mecánica", "Medicina", "Derecho", "Otro"};
+    String programa = (String) JOptionPane.showInputDialog(null,
+            "Selecciona tu programa académico:",
+            "Registro", JOptionPane.QUESTION_MESSAGE,
+            null, programas, programas[0]);
+
+    if (programa == null) {
+        programa = "Otro";
+    }
+
+    usuario = new Usuario(nombre, programa);
+    usuario.registrarPerfil();
+
+    String[] tipos = {"Gato", "Perro"};
+    String tipoElegido = (String) JOptionPane.showInputDialog(null,
+            "¡Hola " + nombre + "! ¿Qué mascota quieres adoptar?",
+            "Selección de mascota", JOptionPane.QUESTION_MESSAGE,
+            null, tipos, tipos[0]);
+
+    if (tipoElegido == null) {
+        tipoElegido = "Gato";
+        }
+
+    String nombreMascota = JOptionPane.showInputDialog(null,
+            "¿Cómo se llamará tu " + tipoElegido + "?",
+            "Nombre de mascota", JOptionPane.QUESTION_MESSAGE);
+
+    if (nombreMascota == null || nombreMascota.trim().isEmpty()) {
+        nombreMascota = tipoElegido.equals("Gato") ? "Michi" : "Firulais";
+        }
+
+    Mascota mascota;
+    if (tipoElegido.equals("Gato")) {
+        mascota = new Gato(nombreMascota);
+        } else {
+        mascota = new Perro(nombreMascota);
+        }
+
+    usuario.asignarMascota(mascota);
+    abrirPantalla();
+    }
+
+    private void abrirPantalla() {
+    pantalla = new presentacion.PantallaJuego(this);
+    pantalla.configurarInfoUsuario(usuario.getNombre(), usuario.getProgramaAcademico());
+    pantalla.configurarInfoMascota(usuario.getMascota().getNombre(), usuario.getMascota().getEspecie());
+    pantalla.actualizarBarras();
+
+    // Guardar al cerrar la ventana
+    pantalla.addWindowListener(new java.awt.event.WindowAdapter() {
+        @Override
+        public void windowClosing(java.awt.event.WindowEvent e) {
+            GestorArchivos.guardarDatos(usuario);
+            System.out.println("Juego guardado. ¡Hasta luego!");
+            }
+        });
+
+    pantalla.setVisible(true);
+    juegoActivo = true;
+    iniciarTimers();
+    }
+    
     private void iniciarTimers() {
         // Timer degradacion cada 10 segundos
         timerDegradacion = new Timer();
