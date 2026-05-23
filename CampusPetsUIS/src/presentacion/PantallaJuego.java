@@ -1,3 +1,7 @@
+package presentacion;
+
+import logica.Mascota;
+import logica.Juego;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;

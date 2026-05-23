@@ -1,3 +1,6 @@
+package logica;
+
+import presentacion.PantallaJuego;
 import javax.swing.*;
 import java.awt.*;
 import java.util.Timer;

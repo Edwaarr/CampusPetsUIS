@@ -1,3 +1,5 @@
+package logica;
+
 public class Perro extends Mascota {
     
     // Constructor

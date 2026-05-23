@@ -1,3 +1,5 @@
+package logica;
+
 public abstract class Mascota {
     
     // Atributos
