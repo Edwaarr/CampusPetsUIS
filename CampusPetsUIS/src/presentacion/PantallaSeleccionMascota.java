@@ -36,6 +36,7 @@ public class PantallaSeleccionMascota extends JPanel {
         tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
 
         JLabel titulo = EstiloUI.titulo("Elige tu mascota", 30);
+        JLabel etiquetaNombreMascota = EstiloUI.texto("Nombre de la mascota", 14);
         tarjetaGato = crearOpcion("GATO", "Gato");
         tarjetaPerro = crearOpcion("PERRO", "Perro");
         campoNombreMascota = EstiloUI.campoTexto();
@@ -54,11 +55,11 @@ public class PantallaSeleccionMascota extends JPanel {
         filaBotones.add(botonVolverMenu);
         filaBotones.add(botonContinuar);
 
-        tarjeta.add(titulo);
+        tarjeta.add(crearFilaCentrada(titulo));
         tarjeta.add(Box.createVerticalStrut(24));
         tarjeta.add(opciones);
         tarjeta.add(Box.createVerticalStrut(18));
-        tarjeta.add(EstiloUI.texto("Nombre de la mascota", 14));
+        tarjeta.add(crearFilaCentrada(etiquetaNombreMascota));
         tarjeta.add(campoNombreMascota);
         tarjeta.add(Box.createVerticalStrut(8));
         tarjeta.add(mensajeError);
@@ -67,6 +68,13 @@ public class PantallaSeleccionMascota extends JPanel {
 
         add(tarjeta, new GridBagConstraints());
         actualizarSeleccion();
+    }
+
+    private JPanel crearFilaCentrada(JLabel etiqueta) {
+        JPanel fila = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        fila.setOpaque(false);
+        fila.add(etiqueta);
+        return fila;
     }
 
     private JPanel crearOpcion(String textoVisible, String especie) {
