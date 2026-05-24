@@ -1,26 +1,23 @@
 package logica;
 
 public class Gato extends Mascota {
-    
-    // Constructor
+
     public Gato(String nombre) {
         super(nombre, "Gato");
     }
-    
-    // Implementación del método abstracto
+
     @Override
     public void hacerSonido() {
-        System.out.println(nombre + " dice: ¡Miau!");
+        System.out.println(nombre + " dice: Miau");
     }
-    
-    // Comportamiento especial del gato
+
     @Override
     public void jugar() throws MascotaException {
         if (energia <= 10) {
-            throw new MascotaException(nombre + " prefiere dormir que jugar. ¡Está agotado!");
+            throw new MascotaException(nombre + " prefiere dormir que jugar. Está agotado.");
         }
-    felicidad = Math.min(100, felicidad + 25);
-    energia = Math.max(0, energia - 8);
-    System.out.println(nombre + " juega con un ovillo. Felicidad: " + felicidad + "%");
+        felicidad = limitar(felicidad + 25);
+        energia = limitar(energia - 10);
+        hambre = limitar(hambre - 6);
     }
 }

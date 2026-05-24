@@ -1,247 +1,282 @@
 package logica;
 
-import presentacion.PantallaJuego;
-import javax.swing.*;
-import java.awt.*;
-import java.util.Timer;
-import java.util.TimerTask;
-import persistencia.GestorArchivos;
+import java.awt.CardLayout;
+import java.awt.Dimension;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.util.ArrayList;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.Timer;
+import persistencia.GestorArchivos;
+import presentacion.DialogoEstadoCritico;
+import presentacion.PantallaAnimales;
+import presentacion.PantallaJuego;
+import presentacion.PantallaMenu;
+import presentacion.PantallaRegistro;
+import presentacion.PantallaSeleccionMascota;
 
 public class Juego {
 
-    //Atributos
-    private Usuario usuario;
-    private PantallaJuego pantalla;
-    private Timer timerDegradacion;
-    private Timer timerMensajes;
-    private boolean juegoActivo;
-    private ArrayList<String> historialAcciones;
+    private static final String REGISTRO = "registro";
+    private static final String MENU = "menu";
+    private static final String ANIMALES = "animales";
+    private static final String SELECCION = "seleccion";
+    private static final String JUEGO = "juego";
 
-    private static final String[] MENSAJES_UIS = {
-        "¿Sabías que en la UIS hay varios animales sin hogar que necesitan ayuda?",
-        "Puedes reportar animales en situación de calle al bienestar universitario UIS.",
-        "Adoptar un animal es un acto de amor. ¡Considera adoptar!",
-        "Los animales del campus UIS merecen cuidado y atención.",
-        "¡Cuida a tu mascota virtual como cuidarías a un animal real!"
-    };
-    private int indiceMensaje = 0;
+    private final JFrame ventana;
+    private final JPanel contenedor;
+    private final CardLayout navegacion;
+    private final PantallaRegistro pantallaRegistro;
+    private final PantallaMenu pantallaMenu;
+    private final PantallaAnimales pantallaAnimales;
+    private final PantallaSeleccionMascota pantallaSeleccion;
+    private final PantallaJuego pantallaJuego;
+    private final ArrayList<String> historialAcciones;
+
+    private Usuario usuario;
+    private Timer timerDegradacion;
+    private boolean estadoCriticoMostrado;
 
     public Juego() {
         historialAcciones = new ArrayList<>();
-        iniciarRegistro();
+        navegacion = new CardLayout();
+        contenedor = new JPanel(navegacion);
+        ventana = new JFrame("Campus Pets UIS");
+
+        pantallaRegistro = new PantallaRegistro();
+        pantallaMenu = new PantallaMenu();
+        pantallaAnimales = new PantallaAnimales();
+        pantallaSeleccion = new PantallaSeleccionMascota();
+        pantallaJuego = new PantallaJuego();
+
+        configurarVentana();
+        configurarPantallas();
+        configurarEventos();
+        mostrar(REGISTRO);
     }
 
-    private void iniciarRegistro() {
-    // Verificar si hay datos guardados
-    if (GestorArchivos.existenDatos()) {
-        int opcion = JOptionPane.showConfirmDialog(null,
-                "Se encontró una partida guardada. ¿Deseas continuarla?",
-                "Partida guardada", JOptionPane.YES_NO_OPTION,
-                JOptionPane.QUESTION_MESSAGE);
-
-        if (opcion == JOptionPane.YES_OPTION) {
-            usuario = GestorArchivos.cargarDatos();
-            abrirPantalla();
-            return;
-        } else {
-            GestorArchivos.eliminarDatos();
-        }
-    }
-
-    // Registro nuevo
-    String nombre = JOptionPane.showInputDialog(null,
-            "¡Bienvenido a Campus Pets UIS! 🐾\nIngresa tu nombre:",
-            "Registro", JOptionPane.QUESTION_MESSAGE);
-
-    if (nombre == null || nombre.trim().isEmpty()) {
-        nombre = "Estudiante";
-    }
-
-    String[] programas = {"Ingeniería de Sistemas", "Ingeniería Civil",
-        "Ingeniería Mecánica", "Medicina", "Derecho", "Otro"};
-    String programa = (String) JOptionPane.showInputDialog(null,
-            "Selecciona tu programa académico:",
-            "Registro", JOptionPane.QUESTION_MESSAGE,
-            null, programas, programas[0]);
-
-    if (programa == null) {
-        programa = "Otro";
-    }
-
-    usuario = new Usuario(nombre, programa);
-    usuario.registrarPerfil();
-
-    String[] tipos = {"Gato", "Perro"};
-    String tipoElegido = (String) JOptionPane.showInputDialog(null,
-            "¡Hola " + nombre + "! ¿Qué mascota quieres adoptar?",
-            "Selección de mascota", JOptionPane.QUESTION_MESSAGE,
-            null, tipos, tipos[0]);
-
-    if (tipoElegido == null) {
-        tipoElegido = "Gato";
-        }
-
-    String nombreMascota = JOptionPane.showInputDialog(null,
-            "¿Cómo se llamará tu " + tipoElegido + "?",
-            "Nombre de mascota", JOptionPane.QUESTION_MESSAGE);
-
-    if (nombreMascota == null || nombreMascota.trim().isEmpty()) {
-        nombreMascota = tipoElegido.equals("Gato") ? "Michi" : "Firulais";
-        }
-
-    Mascota mascota;
-    if (tipoElegido.equals("Gato")) {
-        mascota = new Gato(nombreMascota);
-        } else {
-        mascota = new Perro(nombreMascota);
-        }
-
-    usuario.asignarMascota(mascota);
-    abrirPantalla();
-    }
-
-    private void abrirPantalla() {
-    pantalla = new presentacion.PantallaJuego(this);
-    pantalla.configurarInfoUsuario(usuario.getNombre(), usuario.getProgramaAcademico());
-    pantalla.configurarInfoMascota(usuario.getMascota().getNombre(), usuario.getMascota().getEspecie());
-    pantalla.actualizarBarras();
-
-    // Guardar al cerrar la ventana
-    pantalla.addWindowListener(new java.awt.event.WindowAdapter() {
-        @Override
-        public void windowClosing(java.awt.event.WindowEvent e) {
-            GestorArchivos.guardarDatos(usuario);
-            System.out.println("Juego guardado. ¡Hasta luego!");
+    private void configurarVentana() {
+        ventana.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        ventana.setMinimumSize(new Dimension(760, 560));
+        ventana.setSize(860, 640);
+        ventana.setLocationRelativeTo(null);
+        ventana.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                guardarPartida();
             }
         });
-
-    pantalla.setVisible(true);
-    juegoActivo = true;
-    iniciarTimers();
-    }
-    
-    private void iniciarTimers() {
-        // Timer degradacion cada 10 segundos
-        timerDegradacion = new Timer();
-        timerDegradacion.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (juegoActivo) {
-                    usuario.getMascota().degradarAtributos();
-                    SwingUtilities.invokeLater(() -> {
-                        pantalla.actualizarBarras();
-                        verificarEstadoCritico();
-                    });
-                }
-            }
-        }, 10000, 10000);
-
-        // Timer mensajes educativos cada 15 segundos
-        timerMensajes = new Timer();
-        timerMensajes.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                SwingUtilities.invokeLater(() -> {
-                    pantalla.mostrarMensaje(MENSAJES_UIS[indiceMensaje]);
-                    indiceMensaje = (indiceMensaje + 1) % MENSAJES_UIS.length;
-                });
-            }
-        }, 15000, 15000);
     }
 
-    public void verificarEstadoCritico() {
-        Mascota m = usuario.getMascota();
-        if (m.getHambre() == 0 && m.getEnergia() == 0 && m.getFelicidad() == 0) {
-            juegoActivo = false;
-            timerDegradacion.cancel();
-            timerMensajes.cancel();
-
-            int opcion = JOptionPane.showConfirmDialog(pantalla,
-                    "⚠️ " + m.getNombre() + " está en estado crítico!\n"
-                    + "¿Deseas recuperarla al 50%?",
-                    "Estado Crítico", JOptionPane.YES_NO_OPTION,
-                    JOptionPane.WARNING_MESSAGE);
-
-            if (opcion == JOptionPane.YES_OPTION) {
-                m.setHambre(50);
-                m.setEnergia(50);
-                m.setFelicidad(50);
-                juegoActivo = true;
-                iniciarTimers();
-                pantalla.actualizarBarras();
-                pantalla.mostrarMensaje("¡" + m.getNombre() + " se ha recuperado!");
-            } else {
-                reiniciarJuego();
-            }
-        }
-    }
-    
-
-    public void reiniciarJuego() {
-        pantalla.dispose();
-        new Juego();
+    private void configurarPantallas() {
+        contenedor.add(pantallaRegistro, REGISTRO);
+        contenedor.add(pantallaMenu, MENU);
+        contenedor.add(pantallaAnimales, ANIMALES);
+        contenedor.add(pantallaSeleccion, SELECCION);
+        contenedor.add(pantallaJuego, JUEGO);
+        ventana.setContentPane(contenedor);
+        ventana.setVisible(true);
     }
 
-    // Acciones de los botones
-    public void accionComer() {
-        try {
-            usuario.getMascota().comer();
-            historialAcciones.add("🍖 " + usuario.getMascota().getNombre() + " comió - Hambre: " + usuario.getMascota().getHambre() + "%");
-        } catch (MascotaException e) {
-            pantalla.mostrarMensaje("⚠️ " + e.getMessage());
-            historialAcciones.add("⚠️ Intento de comer fallido: " + e.getMessage());
-        }
+    private void configurarEventos() {
+        pantallaRegistro.getBotonContinuar().addActionListener(e -> registrarUsuario());
+        pantallaMenu.getBotonEmpezar().addActionListener(e -> continuarDesdeMenu());
+        pantallaMenu.getBotonAnimales().addActionListener(e -> mostrar(ANIMALES));
+        pantallaAnimales.getBotonVolver().addActionListener(e -> mostrar(MENU));
+        pantallaSeleccion.getBotonVolverMenu().addActionListener(e -> mostrar(MENU));
+        pantallaSeleccion.getBotonContinuar().addActionListener(e -> crearMascota());
+
+        pantallaJuego.getBotonVolverMenu().addActionListener(e -> volverAlMenu());
+        pantallaJuego.getBotonComer().addActionListener(e -> ejecutarAccion("Comer", PantallaJuego.ESTADO_COMIENDO, () -> usuario.getMascota().comer()));
+        pantallaJuego.getBotonJugar().addActionListener(e -> ejecutarAccion("Jugar", PantallaJuego.ESTADO_FELIZ, () -> usuario.getMascota().jugar()));
+        pantallaJuego.getBotonDormir().addActionListener(e -> ejecutarAccion("Dormir", PantallaJuego.ESTADO_DURMIENDO, () -> usuario.getMascota().dormir()));
     }
 
-    public void accionJugar() {
-        try {
-            usuario.getMascota().jugar();
-            historialAcciones.add("🎾 " + usuario.getMascota().getNombre() + " jugó - Felicidad: " + usuario.getMascota().getFelicidad() + "%");
-        } catch (MascotaException e) {
-            pantalla.mostrarMensaje("⚠️ " + e.getMessage());
-            historialAcciones.add("⚠️ Intento de jugar fallido: " + e.getMessage());
-        }
-    }
-
-    public void accionDormir() {
-        try {
-            usuario.getMascota().dormir();
-            historialAcciones.add("💤 " + usuario.getMascota().getNombre() + " durmió - Energía: " + usuario.getMascota().getEnergia() + "%");
-        } catch (MascotaException e) {
-            pantalla.mostrarMensaje("⚠️ " + e.getMessage());
-            historialAcciones.add("⚠️ Intento de dormir fallido: " + e.getMessage());
-        }
-    }
-
-    public void accionSonido() {
-        usuario.getMascota().hacerSonido();
-        historialAcciones.add("🔊 " + usuario.getMascota().getNombre() + " hizo un sonido");
-    }
-    
-    public void mostrarHistorial() {
-        if (historialAcciones.isEmpty()) {
-            System.out.println("No hay acciones registradas aún.");
+    private void registrarUsuario() {
+        if (!pantallaRegistro.datosValidos()) {
             return;
         }
-        System.out.println("=== HISTORIAL DE ACCIONES ===");
-        for (String accion : historialAcciones) {
-            System.out.println(accion);
+
+        usuario = new Usuario(pantallaRegistro.getNombreUsuario(), pantallaRegistro.getCarrera());
+        pantallaMenu.configurarUsuario(usuario.getNombre(), usuario.getProgramaAcademico());
+        mostrar(MENU);
+    }
+
+    private void continuarDesdeMenu() {
+        if (usuario != null && usuario.getMascota() != null) {
+            mostrarJuego();
+            if (!usuario.getMascota().estaEnEstadoCritico()) {
+                iniciarTimerDegradacion();
+            }
+            return;
         }
-        System.out.println("Total de acciones: " + historialAcciones.size());
+        mostrar(SELECCION);
+    }
+
+    private void crearMascota() {
+        if (!pantallaSeleccion.datosValidos()) {
+            return;
+        }
+
+        Mascota mascota = pantallaSeleccion.getEspecieSeleccionada().equals("Gato")
+                ? new Gato(pantallaSeleccion.getNombreMascota())
+                : new Perro(pantallaSeleccion.getNombreMascota());
+
+        usuario.asignarMascota(mascota);
+        pantallaJuego.configurarUsuario(usuario.getNombre(), usuario.getProgramaAcademico());
+        pantallaJuego.actualizar(mascota);
+        pantallaJuego.mostrarMensaje("Tu " + mascota.getEspecie().toLowerCase() + " ya está listo para jugar.");
+        mostrarJuego();
+        iniciarTimerDegradacion();
+    }
+
+    private void ejecutarAccion(String nombreAccion, String estadoVisual, AccionMascota accion) {
+        if (usuario == null || usuario.getMascota() == null || estadoCriticoMostrado) {
+            return;
+        }
+
+        Mascota mascota = usuario.getMascota();
+        try {
+            accion.ejecutar();
+            historialAcciones.add(nombreAccion + " - " + mascota.verEstado());
+            pantallaJuego.mostrarMensaje(mensajeAccion(nombreAccion, mascota));
+            actualizarJuego(estadoVisual);
+        } catch (MascotaException ex) {
+            pantallaJuego.mostrarMensaje(ex.getMessage());
+            actualizarJuego();
+        }
+    }
+
+    private String mensajeAccion(String accion, Mascota mascota) {
+        if (accion.equals("Comer")) {
+            return mascota.getNombre() + " comió y se siente mejor.";
+        }
+        if (accion.equals("Jugar")) {
+            return mascota.getNombre() + " jugó contigo.";
+        }
+        return mascota.getNombre() + " descansó un rato.";
+    }
+
+    private void iniciarTimerDegradacion() {
+        detenerTimer();
+        timerDegradacion = new Timer(5000, e -> {
+            usuario.getMascota().degradarAtributos();
+            pantallaJuego.mostrarMensaje("El tiempo pasa: cuida sus barras.");
+            actualizarJuego();
+        });
+        timerDegradacion.start();
+    }
+
+    private void actualizarJuego() {
+        actualizarJuego(null);
+    }
+
+    private void actualizarJuego(String estadoVisual) {
+        Mascota mascota = usuario.getMascota();
+        if (estadoVisual == null) {
+            pantallaJuego.actualizar(mascota);
+        } else {
+            pantallaJuego.actualizar(mascota, estadoVisual);
+        }
+        if (mascota.estaEnEstadoCritico()) {
+            mostrarEstadoCritico();
+        }
+    }
+
+    private void mostrarEstadoCritico() {
+        if (estadoCriticoMostrado) {
+            return;
+        }
+
+        estadoCriticoMostrado = true;
+        detenerTimer();
+        Mascota mascota = usuario.getMascota();
+        DialogoEstadoCritico dialogo = new DialogoEstadoCritico(
+                ventana,
+                mascota.getNombre(),
+                this::recuperarMascota,
+                this::reiniciarJuego,
+                this::volverAlMenuDesdeDialogo);
+        dialogo.setVisible(true);
+    }
+
+    private void recuperarMascota() {
+        Mascota mascota = usuario.getMascota();
+        mascota.recuperar();
+        estadoCriticoMostrado = false;
+        pantallaJuego.mostrarMensaje(mascota.getNombre() + " se recuperó al 60%.");
+        actualizarJuego();
+        iniciarTimerDegradacion();
+    }
+
+    private void volverAlMenu() {
+        detenerTimer();
+        mostrar(MENU);
+    }
+
+    private void volverAlMenuDesdeDialogo() {
+        detenerTimer();
+        estadoCriticoMostrado = false;
+        mostrar(MENU);
+    }
+
+    private void mostrarJuego() {
+        pantallaJuego.actualizar(usuario.getMascota());
+        mostrar(JUEGO);
+        if (usuario.getMascota().estaEnEstadoCritico()) {
+            mostrarEstadoCritico();
+        }
+    }
+
+    public void reiniciarJuego() {
+        detenerTimer();
+        estadoCriticoMostrado = false;
+        usuario = null;
+        historialAcciones.clear();
+        GestorArchivos.eliminarDatos();
+        mostrar(REGISTRO);
+    }
+
+    private void detenerTimer() {
+        if (timerDegradacion != null) {
+            timerDegradacion.stop();
+        }
+    }
+
+    private void guardarPartida() {
+        if (usuario != null && usuario.getMascota() != null) {
+            GestorArchivos.guardarDatos(usuario);
+        }
+    }
+
+    private void mostrar(String pantalla) {
+        navegacion.show(contenedor, pantalla);
+    }
+
+    public Usuario getUsuario() {
+        return usuario;
     }
 
     public ArrayList<String> getHistorialAcciones() {
         return historialAcciones;
     }
 
-    // Getter
-    public Usuario getUsuario() {
-        return usuario;
+    @FunctionalInterface
+    private interface AccionMascota {
+        void ejecutar() throws MascotaException;
     }
 
-    // Main - punto de entrada del juego
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new Juego());
+        SwingUtilities.invokeLater(() -> {
+            try {
+                javax.swing.UIManager.setLookAndFeel(javax.swing.UIManager.getSystemLookAndFeelClassName());
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(null, "No se pudo cargar el estilo del sistema.");
+            }
+            new Juego();
+        });
     }
 }
