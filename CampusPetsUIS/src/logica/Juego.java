@@ -12,6 +12,7 @@ import javax.swing.SwingUtilities;
 import javax.swing.Timer;
 import persistencia.GestorArchivos;
 import presentacion.DialogoEstadoCritico;
+
 import presentacion.PantallaAnimales;
 import presentacion.PantallaJuego;
 import presentacion.PantallaMenu;
@@ -55,7 +56,7 @@ public class Juego {
         configurarVentana();
         configurarPantallas();
         configurarEventos();
-        mostrar(REGISTRO);
+        iniciarConPartidaGuardada();
     }
 
     private void configurarVentana() {
@@ -93,6 +94,44 @@ public class Juego {
         pantallaJuego.getBotonComer().addActionListener(e -> ejecutarAccion("Comer", PantallaJuego.ESTADO_COMIENDO, () -> usuario.getMascota().comer()));
         pantallaJuego.getBotonJugar().addActionListener(e -> ejecutarAccion("Jugar", PantallaJuego.ESTADO_FELIZ, () -> usuario.getMascota().jugar()));
         pantallaJuego.getBotonDormir().addActionListener(e -> ejecutarAccion("Dormir", PantallaJuego.ESTADO_DURMIENDO, () -> usuario.getMascota().dormir()));
+    }
+
+    private void iniciarConPartidaGuardada() {
+        if (!GestorArchivos.existenDatos()) {
+            mostrar(REGISTRO);
+            return;
+        }
+        
+        int opcion = JOptionPane.showConfirmDialog(
+                ventana,
+                "Se encontró una partida guardada.\n¿Deseas continuarla?",
+                "Partida guardada",
+                JOptionPane.YES_NO_OPTION,
+                JOptionPane.QUESTION_MESSAGE);
+
+        if (opcion == JOptionPane.YES_OPTION) {
+            Usuario usuarioCargado = GestorArchivos.cargarDatos();
+            if (usuarioCargado != null && usuarioCargado.getMascota() != null) {
+                usuario = usuarioCargado;
+                pantallaMenu.configurarUsuario(usuario.getNombre(), usuario.getProgramaAcademico());
+                pantallaJuego.configurarUsuario(usuario.getNombre(), usuario.getProgramaAcademico());
+                mostrarJuego();
+                if (!usuario.getMascota().estaEnEstadoCritico()) {
+                    iniciarTimerDegradacion();
+                }
+                return;
+            }
+
+            JOptionPane.showMessageDialog(
+                    ventana,
+                    "No fue posible cargar la partida guardada.",
+                    "Error de carga",
+                    JOptionPane.WARNING_MESSAGE);
+        } else {
+            GestorArchivos.eliminarDatos();
+        }
+
+        mostrar(REGISTRO);
     }
 
     private void registrarUsuario() {

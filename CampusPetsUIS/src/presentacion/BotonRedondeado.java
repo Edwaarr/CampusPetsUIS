@@ -15,18 +15,18 @@ import javax.swing.SwingConstants;
 
 public class BotonRedondeado extends JButton {
 
-    private static final int RADIO = 24;
-    private final Color colorNormal = new Color(0x43A047);
-    private final Color colorHover = new Color(0x388E3C);
-    private final Color colorPresionado = new Color(0x2E7D32);
+    private static final int RADIO = 22;
+    private final Color colorNormal = EstiloUI.VERDE;
+    private final Color colorHover = EstiloUI.VERDE_HOVER;
+    private final Color colorPresionado = EstiloUI.VERDE_PRESIONADO;
     private Color colorActual = colorNormal;
 
     public BotonRedondeado(String texto) {
         super(texto);
         setForeground(Color.WHITE);
         setFont(new Font("Segoe UI", Font.BOLD, 16));
-        setPreferredSize(new Dimension(205, 50));
-        setMinimumSize(new Dimension(170, 50));
+        setPreferredSize(new Dimension(205, 54));
+        setMinimumSize(new Dimension(180, 54));
         setHorizontalAlignment(SwingConstants.CENTER);
         setVerticalAlignment(SwingConstants.CENTER);
         setBorder(BorderFactory.createEmptyBorder(12, 24, 12, 24));

@@ -1,7 +1,6 @@
 package presentacion;
 
 import java.awt.Color;
-import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.awt.Image;
@@ -18,13 +17,15 @@ import javax.swing.SwingConstants;
 
 public final class EstiloUI {
 
-    public static final Color FONDO = new Color(0xE8F5E9);
+    public static final Color FONDO = new Color(0xEFFAF4);
     public static final Color PANEL = Color.WHITE;
     public static final Color TEXTO = new Color(0x333333);
-    public static final Color VERDE = new Color(0x43A047);
-    public static final Color VERDE_HOVER = new Color(0x388E3C);
-    public static final Color VERDE_PRESIONADO = new Color(0x2E7D32);
+    public static final Color VERDE = new Color(0x55B989);
+    public static final Color VERDE_HOVER = new Color(0x46A477);
+    public static final Color VERDE_PRESIONADO = new Color(0x3D8F68);
     public static final Color VERDE_OSCURO = VERDE_PRESIONADO;
+    public static final Color VERDE_BARRA = new Color(0x74C69D);
+    public static final Color FONDO_BARRA = new Color(0xDFF3E8);
     public static final Color NARANJA = VERDE;
     public static final Color AZUL = VERDE;
     public static final Color ROSA = VERDE;
@@ -36,7 +37,7 @@ public final class EstiloUI {
     public static JLabel titulo(String texto, int tamano) {
         JLabel label = new JLabel(texto, SwingConstants.CENTER);
         label.setFont(new Font("Segoe UI", Font.BOLD, tamano));
-        label.setForeground(TEXTO);
+        label.setForeground(VERDE_PRESIONADO);
         return label;
     }
 
@@ -52,14 +53,13 @@ public final class EstiloUI {
     }
 
     public static JTextField campoTexto() {
-        JTextField campo = new JTextField();
+        JTextField campo = new CampoTextoRedondeado();
         campo.setFont(new Font("Segoe UI", Font.PLAIN, 16));
         campo.setForeground(TEXTO);
-        campo.setHorizontalAlignment(SwingConstants.CENTER);
-        campo.setPreferredSize(new Dimension(320, 42));
-        campo.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDE, 1),
-                BorderFactory.createEmptyBorder(8, 12, 8, 12)));
+        campo.setHorizontalAlignment(SwingConstants.LEFT);
+        campo.setPreferredSize(new Dimension(505, 64));
+        campo.setMaximumSize(new Dimension(505, 64));
+        campo.setBorder(BorderFactory.createEmptyBorder(10, 18, 10, 18));
         return campo;
     }
 
@@ -67,19 +67,17 @@ public final class EstiloUI {
         JProgressBar barra = new JProgressBar(0, 100);
         barra.setValue(100);
         barra.setStringPainted(true);
-        barra.setForeground(VERDE);
-        barra.setBackground(new Color(0xE0E0E0));
+        barra.setForeground(VERDE_BARRA);
+        barra.setBackground(FONDO_BARRA);
         barra.setPreferredSize(new Dimension(330, 30));
         barra.setFont(new Font("Segoe UI", Font.BOLD, 13));
         return barra;
     }
 
     public static JPanel tarjeta() {
-        JPanel panel = new JPanel();
+        JPanel panel = new PanelRedondeado(28);
         panel.setBackground(PANEL);
-        panel.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(BORDE, 1),
-                BorderFactory.createEmptyBorder(24, 28, 24, 28)));
+        panel.setBorder(BorderFactory.createEmptyBorder(52, 60, 52, 60));
         return panel;
     }
 

@@ -1,5 +1,6 @@
 package presentacion;
 
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -22,31 +23,43 @@ public class PantallaMenu extends JPanel {
         JPanel tarjeta = EstiloUI.tarjeta();
         tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
 
-        JLabel imagenMenu = EstiloUI.imagen("menu.png", 360, 190);
+        JLabel titulo = EstiloUI.imagen("menu.png", 360, 285);
+        JLabel subtitulo = EstiloUI.texto("Juego educativo de cuidado animal", 20);
         etiquetaUsuario = EstiloUI.texto("Bienvenido", 16);
         botonEmpezar = EstiloUI.boton("Empezar", EstiloUI.VERDE);
         botonAnimales = EstiloUI.boton("Conoce a los animales", EstiloUI.VERDE);
+        configurarBotonAncho(botonEmpezar);
+        configurarBotonAncho(botonAnimales);
 
-        JPanel filaImagen = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
-        filaImagen.setOpaque(false);
-        filaImagen.add(imagenMenu);
+        JPanel filaTitulo = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        filaTitulo.setOpaque(false);
+        filaTitulo.add(titulo);
+
+        JPanel filaSubtitulo = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
+        filaSubtitulo.setOpaque(false);
+        filaSubtitulo.add(subtitulo);
 
         JPanel filaUsuario = new JPanel(new FlowLayout(FlowLayout.CENTER));
         filaUsuario.setOpaque(false);
         filaUsuario.add(etiquetaUsuario);
 
-        JPanel filaBotones = new JPanel(new FlowLayout(FlowLayout.CENTER, 16, 0));
-        filaBotones.setOpaque(false);
-        filaBotones.add(botonEmpezar);
-        filaBotones.add(botonAnimales);
-
-        tarjeta.add(filaImagen);
+        tarjeta.add(filaTitulo);
         tarjeta.add(Box.createVerticalStrut(18));
+        tarjeta.add(filaSubtitulo);
+        tarjeta.add(Box.createVerticalStrut(14));
         tarjeta.add(filaUsuario);
-        tarjeta.add(Box.createVerticalStrut(28));
-        tarjeta.add(filaBotones);
+        tarjeta.add(Box.createVerticalStrut(50));
+        tarjeta.add(botonEmpezar);
+        tarjeta.add(Box.createVerticalStrut(20));
+        tarjeta.add(botonAnimales);
 
         add(tarjeta, new GridBagConstraints());
+    }
+
+    private void configurarBotonAncho(JButton boton) {
+        boton.setPreferredSize(new Dimension(630, 86));
+        boton.setMaximumSize(new Dimension(630, 86));
+        boton.setAlignmentX(CENTER_ALIGNMENT);
     }
 
     public void configurarUsuario(String nombre, String carrera) {

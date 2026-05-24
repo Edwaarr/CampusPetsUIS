@@ -2,6 +2,7 @@ package presentacion;
 
 import java.awt.BorderLayout;
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -26,26 +27,30 @@ public class PantallaRegistro extends JPanel {
         JPanel tarjeta = EstiloUI.tarjeta();
         tarjeta.setLayout(new BoxLayout(tarjeta, BoxLayout.Y_AXIS));
 
-        JLabel titulo = EstiloUI.titulo("Campus Pets UIS", 32);
-        JLabel subtitulo = EstiloUI.texto("Registra tu perfil para comenzar", 16);
+        JLabel titulo = EstiloUI.titulo("CAMPUS PETS UIS", 42);
+        JLabel subtitulo = EstiloUI.texto("Bienvenido al juego educativo de cuidado animal", 18);
         campoNombre = EstiloUI.campoTexto();
         campoCarrera = EstiloUI.campoTexto();
         botonContinuar = EstiloUI.boton("Continuar", EstiloUI.VERDE);
+        botonContinuar.setPreferredSize(new Dimension(505, 64));
+        botonContinuar.setMaximumSize(new Dimension(505, 64));
         mensajeError = EstiloUI.texto(" ", 13);
         mensajeError.setForeground(EstiloUI.ROSA);
 
         agregarCentrado(tarjeta, titulo);
-        tarjeta.add(Box.createVerticalStrut(8));
+        tarjeta.add(Box.createVerticalStrut(26));
         agregarCentrado(tarjeta, subtitulo);
-        tarjeta.add(Box.createVerticalStrut(28));
-        tarjeta.add(etiquetaCampo("Nombre *"));
+        tarjeta.add(Box.createVerticalStrut(42));
+        tarjeta.add(etiquetaCampo("Nombre del usuario"));
+        tarjeta.add(Box.createVerticalStrut(10));
         tarjeta.add(campoNombre);
-        tarjeta.add(Box.createVerticalStrut(16));
-        tarjeta.add(etiquetaCampo("Carrera"));
+        tarjeta.add(Box.createVerticalStrut(28));
+        tarjeta.add(etiquetaCampo("Programa académico (opcional)"));
+        tarjeta.add(Box.createVerticalStrut(10));
         tarjeta.add(campoCarrera);
-        tarjeta.add(Box.createVerticalStrut(10));
+        tarjeta.add(Box.createVerticalStrut(18));
         agregarCentrado(tarjeta, mensajeError);
-        tarjeta.add(Box.createVerticalStrut(10));
+        tarjeta.add(Box.createVerticalStrut(22));
 
         JPanel filaBoton = new JPanel(new FlowLayout(FlowLayout.CENTER, 0, 0));
         filaBoton.setOpaque(false);
@@ -58,6 +63,9 @@ public class PantallaRegistro extends JPanel {
     private JLabel etiquetaCampo(String texto) {
         JLabel label = EstiloUI.texto(texto, 14);
         label.setHorizontalAlignment(JLabel.LEFT);
+        label.setFont(new java.awt.Font("Segoe UI", java.awt.Font.BOLD, 17));
+        label.setPreferredSize(new Dimension(505, 24));
+        label.setMaximumSize(new Dimension(505, 24));
         label.setAlignmentX(Component.CENTER_ALIGNMENT);
         return label;
     }
